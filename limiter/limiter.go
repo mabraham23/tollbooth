@@ -563,13 +563,14 @@ func (l *Limiter) RemoveContextValuesEntries(contextValue string, entriesForRemo
 func (l *Limiter) limitReachedWithTokenBucketTTL(key string, tokenBucketTTL time.Duration) bool {
 	lmtMax := l.GetMax()
 	lmtBurst := l.GetBurst()
+	rt := rate.Every(time.Minute / time.Duration((lmtMax)))
 	l.Lock()
 	defer l.Unlock()
 
 	if _, found := l.tokenBuckets.Get(key); !found {
 		l.tokenBuckets.Set(
 			key,
-			rate.NewLimiter(rate.Limit(lmtMax), lmtBurst),
+			rate.NewLimiter(rt, lmtBurst),
 			tokenBucketTTL,
 		)
 	}
